@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
@@ -12,12 +13,17 @@ export default function Home() {
 
   const deleteTaskMutation = api.tasks.deleteTask.useMutation();
   const createTaskMutation = api.tasks.createTask.useMutation();
+  const editTaskMutation = api.tasks.completeTask.useMutation();
   
   async function handleDeletion(id: number) {
     const idstring = id.toString();
     console.log('id', id)
    
-   try {
+    try {
+      const shouldDelete = window.confirm("Are you sure you want to delete this task?");
+      if (!shouldDelete) {
+        return;
+      }
      await deleteTaskMutation.mutateAsync({ id: idstring });
      await tasks.refetch();
      return undefined;
@@ -29,11 +35,22 @@ export default function Home() {
   async function handleCreation() {
     try {
       console.log(taskForm)
-      await createTaskMutation.mutateAsync({task: taskForm});
+      await createTaskMutation.mutateAsync({ task: taskForm });
+      setTaskForm('')
+      await tasks.refetch()
     } catch (error) {
       console.log(error);
       throw new Error("Failed to create task.", error as Error);
     }
+  }
+  async function handleCompletion(id: number, completed: boolean) {
+    const completion = !completed;
+    try {
+      await editTaskMutation.mutateAsync({ taskId: id, completed: completion})
+        await tasks.refetch();
+      } catch (error) {
+        throw new Error("Failed to complete task.", error as Error);
+      }
   }
 
 
@@ -51,10 +68,9 @@ export default function Home() {
              Amount of tasks: {tasks.data ? tasks.data.length : "Loading."}
           </p>
           <p className='text-xl text-white gap-2 p-1'>
-            Add a task:{' '}
             <form onSubmit={(e) => {
     e.preventDefault();
-    void handleCreation().catch(error => console.error(error)).then(async ()=> await tasks.refetch());
+    void handleCreation().catch(error => console.error(error));
 }}>
             <input placeholder='Add a task' className='border-2 rounded-md text-green-500' onChange={(e) => setTaskForm(String(e.target.value))} />
             <button type='submit' className='bg-blue-500 px-2 py-2 rounded ml-2'>Add</button>
@@ -67,8 +83,9 @@ export default function Home() {
         <>
             <div key={item.id} className='text-center my-1 p-2 ml-2 snap-end bg-slate-500 rounded-lg  flex justify-between items-center '>
               {item.task}
+
               <div className='flex gap-3 px-4'>
-              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' />
+              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={() => handleCompletion(item.id, item.complete)} />
               <Image src={Trashcan as string} alt="Trashcan" width={14} onClick={()=> void (async () => await handleDeletion(item.id))()}/>
               </div>
         </div>
@@ -82,6 +99,7 @@ export default function Home() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function AuthShowcase() {
   const { data: sessionData } = useSession();
 
