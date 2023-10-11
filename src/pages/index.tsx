@@ -8,6 +8,7 @@ import { Suspense, useState } from 'react';
 
 
 export default function Home() {
+  const user = useSession()
   const tasks = api.tasks.getTasks.useQuery();
   const [taskForm, setTaskForm] = useState('');
 
@@ -35,7 +36,7 @@ export default function Home() {
   async function handleCreation() {
     try {
       console.log(taskForm)
-      await createTaskMutation.mutateAsync({ task: taskForm });
+      await createTaskMutation.mutateAsync({ task: taskForm, userId: user.data?.user.id });
       setTaskForm('')
       await tasks.refetch()
     } catch (error) {
@@ -69,23 +70,23 @@ export default function Home() {
           </p>
           <p className='text-xl text-white gap-2 p-1'>
             </p>
-            <form className='text-xl text-white gap-2 p-1' onSubmit={(e) => {
+            <form className='text-xl text-white gap-2 bg-slate-900 rounded-md p-4 px-8' onSubmit={(e) => {
     e.preventDefault();
     void handleCreation().catch(error => console.error(error));
 }}>
-            <input placeholder='Add a task' className='border-2 rounded-md text-green-500' onChange={(e) => setTaskForm(String(e.target.value))} />
-            <button type='submit' className='bg-blue-500 px-2 py-2 rounded ml-2'>Add</button>
+            <input placeholder='Add a task' value={taskForm || ""} className='border-2 rounded-md text-green-500' onChange={(e) => setTaskForm(String(e.target.value))} />
+            <button type='submit' className='bg-blue-500 px-2 py-2 rounded ml-2 hover:bg-blue-600'>Add</button>
             </form>
 
           <div className='flex gap-2 p-4 container bg-[#15162c] max-w-2xl rounded-lg flex-col overflow-y-auto scroll-smooth bg-scroll snap-both snap-proximity'>
             <Suspense>              
         {tasks && tasks.data?.map(item => (
           <>
-            <div key={item.id} className='text-center my-1 p-2 ml-2 snap-end bg-slate-500 rounded-lg  flex justify-between items-center '>
+            <div key={item.id} className='text-center my-1 p-2 ml-2 snap-end bg-slate-500 rounded-lg  flex justify-between items-center hover:bg-slate-600'>
               {item.task}
 
               <div className='flex gap-3 px-4'>
-              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={void (() => handleCompletion(item.id, item.complete))} />
+              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={void (() => handleCompletion(item.id, item.complete))}/>
               <Image src={Trashcan as string} alt="Trashcan" width={14} onClick={()=> void (async () => await handleDeletion(item.id))()}/>
               </div>
         </div>

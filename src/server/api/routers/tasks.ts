@@ -11,12 +11,12 @@ export const tasksRouter = createTRPCRouter({
     return tasks;
     }),
   createTask: publicProcedure
-    .input(z.object({ task: z.string() }))
+    .input(z.object({ task: z.string(), userId: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
       return ctx.db.whatToDo.create({
         data:{
           task: input.task,
-          userId: 'clnj0js460000i5vsv08tm92o',
+          userId: input.userId ?? 'clnj0js460000i5vsv08tm92o',
           complete: false
         }
       });
