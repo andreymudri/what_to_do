@@ -1,9 +1,41 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import Image from "next/image";
 import { api } from "@/utils/api";
+import Trashcan from "@/assets/trash-can-solid.svg"
+import { useState } from 'react';
+
 
 export default function Home() {
   const tasks = api.tasks.getTasks.useQuery();
+  const [taskForm, setTaskForm] = useState('');
+
+  const deleteTaskMutation = api.tasks.deleteTask.useMutation();
+  const createTaskMutation = api.tasks.createTask.useMutation();
+  
+  async function handleDeletion(id: number) {
+    const idstring = id.toString();
+    console.log('id', id)
+   
+   try {
+     await deleteTaskMutation.mutateAsync({ id: idstring });
+     await tasks.refetch();
+     return undefined;
+   } catch (error) {
+     console.log(error);
+  throw new Error("Failed to delete task.", error as Error);
+   }
+  }
+  async function handleCreation() {
+    try {
+      console.log(taskForm)
+      await createTaskMutation.mutateAsync({task: taskForm});
+    } catch (error) {
+      console.log(error);
+      throw new Error("Failed to create task.", error as Error);
+    }
+  }
+
 
   return (
     <>
@@ -13,12 +45,37 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+        <div className="flex flex-col items-center justify-center gap-12 px-4 py-16 ">
          
             <p className="text-2xl text-white">
-             Ammount of tasks: {tasks.data ? tasks.data.length : "Loading tRPC query..."}
+             Amount of tasks: {tasks.data ? tasks.data.length : "Loading."}
+          </p>
+          <p className='text-xl text-white gap-2 p-1'>
+            Add a task:{' '}
+            <form onSubmit={(e) => {
+    e.preventDefault();
+    void handleCreation().catch(error => console.error(error)).then(async ()=> await tasks.refetch());
+}}>
+            <input placeholder='Add a task' className='border-2 rounded-md text-green-500' onChange={(e) => setTaskForm(String(e.target.value))} />
+            <button type='submit' className='bg-blue-500 px-2 py-2 rounded ml-2'>Add</button>
+            </form>
+
             </p>
-            <AuthShowcase />
+
+          <div className='flex gap-2 p-4 container bg-[#15162c] max-w-2xl rounded-lg flex-col overflow-y-auto scroll-smooth bg-scroll snap-both snap-proximity'>
+        {tasks && tasks.data?.map(item => (
+        <>
+            <div key={item.id} className='text-center my-1 p-2 ml-2 snap-end bg-slate-500 rounded-lg  flex justify-between items-center '>
+              {item.task}
+              <div className='flex gap-3 px-4'>
+              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' />
+              <Image src={Trashcan as string} alt="Trashcan" width={14} onClick={()=> void (async () => await handleDeletion(item.id))()}/>
+              </div>
+        </div>
+        </>
+      ))}
+        </div>
+{/*             <AuthShowcase /> */}
           </div>
       </main>
     </>
@@ -28,16 +85,12 @@ export default function Home() {
 function AuthShowcase() {
   const { data: sessionData } = useSession();
 
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
-    { enabled: sessionData?.user !== undefined }
-  );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#2e026d] to-[#15162c] rounded-full">
       <p className="text-center text-2xl text-white">
         {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
+
       </p>
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
@@ -48,3 +101,4 @@ function AuthShowcase() {
     </div>
   );
 }
+
