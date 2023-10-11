@@ -19,7 +19,7 @@ export const manualAuthRouter = createTRPCRouter({
         throw new Error('Invalid username or password')
       }
       //TODO implement login auth
-      return input
+      return getuser
     }),
   register: publicProcedure
     .input(z.object({ username: z.string(), password: z.string() }))

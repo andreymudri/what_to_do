@@ -9,7 +9,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "@/env.mjs";
 import { db } from "@/server/db";
-import { type User } from '@prisma/client';
+import { api } from '../utils/api';
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -59,20 +59,17 @@ export const authOptions: NextAuthOptions = {
         if (!credentials) {
           return null
         }
-        const res = await fetch("/api/trpc/manualAuthRouter.login", {
-          method: 'POST',
-          body: JSON.stringify(credentials),
-          headers: { "Content-Type": "application/json" }
-        });
-        const user = await res.json() as User;
+       const loginMutator = api.auth.login.useMutation();
 
-        if (!res.ok) {
-          console.error('Failed to fetch:', res.status, res.statusText);
+        const res = await loginMutator.mutateAsync(credentials)
+
+        if (!res) {
+          console.error('Failed to fetch:', res);
           // Handle the error as needed
         }
         // If no error and we have user data, return it
-        if (res.ok && user) {
-          return Promise.resolve(user);
+        if (res) {
+          return Promise.resolve(res);
         }
 
         // Return null if user data could not be retrieved

@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
+'use client'
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { api } from "@/utils/api";
 import Trashcan from "@/assets/trash-can-solid.svg"
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 
 export default function Home() {
@@ -68,7 +68,8 @@ export default function Home() {
              Amount of tasks: {tasks.data ? tasks.data.length : "Loading."}
           </p>
           <p className='text-xl text-white gap-2 p-1'>
-            <form onSubmit={(e) => {
+            </p>
+            <form className='text-xl text-white gap-2 p-1' onSubmit={(e) => {
     e.preventDefault();
     void handleCreation().catch(error => console.error(error));
 }}>
@@ -76,21 +77,21 @@ export default function Home() {
             <button type='submit' className='bg-blue-500 px-2 py-2 rounded ml-2'>Add</button>
             </form>
 
-            </p>
-
           <div className='flex gap-2 p-4 container bg-[#15162c] max-w-2xl rounded-lg flex-col overflow-y-auto scroll-smooth bg-scroll snap-both snap-proximity'>
+            <Suspense>              
         {tasks && tasks.data?.map(item => (
-        <>
+          <>
             <div key={item.id} className='text-center my-1 p-2 ml-2 snap-end bg-slate-500 rounded-lg  flex justify-between items-center '>
               {item.task}
 
               <div className='flex gap-3 px-4'>
-              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={() => handleCompletion(item.id, item.complete)} />
+              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={void (() => handleCompletion(item.id, item.complete))} />
               <Image src={Trashcan as string} alt="Trashcan" width={14} onClick={()=> void (async () => await handleDeletion(item.id))()}/>
               </div>
         </div>
         </>
       ))}
+      </Suspense>
         </div>
 {/*             <AuthShowcase /> */}
           </div>
