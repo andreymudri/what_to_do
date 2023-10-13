@@ -66,7 +66,9 @@ export default function Home() {
         <div className="flex flex-col items-center justify-center gap-12 px-4 py-16 ">
          
             <p className="text-2xl text-white">
-             Amount of tasks: {tasks.data ? tasks.data.length : "Loading."}
+            O que fazer com o meu amorzinho??
+            <br />
+            quantidade de itens:{tasks.data ? tasks.data.length : "Loading."}
           </p>
           <p className='text-xl text-white gap-2 p-1'>
             </p>
