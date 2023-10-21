@@ -9,6 +9,7 @@ import { Suspense, useState } from 'react';
 
 export default function Home() {
   const user = useSession()
+  const { data: sessionData } = useSession();
   const tasks = api.tasks.getTasks.useQuery();
   const [taskForm, setTaskForm] = useState('');
 
@@ -17,9 +18,7 @@ export default function Home() {
   const editTaskMutation = api.tasks.completeTask.useMutation();
   
   async function handleDeletion(id: number) {
-    const idstring = id.toString();
-    console.log('id', id)
-   
+    const idstring = id.toString();   
     try {
       const shouldDelete = window.confirm("Are you sure you want to delete this task?");
       if (!shouldDelete) {
@@ -77,7 +76,8 @@ export default function Home() {
     void handleCreation().catch(error => console.error(error));
 }}>
             <input placeholder='Add a task' value={taskForm || ""} className='border-2 rounded-md text-green-500' onChange={(e) => setTaskForm(String(e.target.value))} />
-            <button type='submit' className='bg-blue-500 px-2 py-2 rounded ml-2 hover:bg-blue-600'>Add</button>
+            <button type='submit' disabled={!sessionData?.user} className={`bg-${sessionData?.user ? 'blue' : 'gray'}-500 px-2 py-2 rounded ml-2 hover:bg-blue-600 ${!sessionData?.user ? 'cursor-not-allowed' : ''}`}>
+            Add</button>
             </form>
 
           <div className='flex gap-2 p-4 container bg-[#15162c] max-w-2xl rounded-lg flex-col overflow-y-auto scroll-smooth bg-scroll snap-both snap-proximity'>
@@ -88,7 +88,7 @@ export default function Home() {
               {item.task}
 
               <div className='flex gap-3 px-4'>
-              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={void (async () => handleCompletion(item.id, item.complete))}/>
+                <input type="checkbox" defaultChecked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onChange={ () =>  void handleCompletion(item.id, item.complete)}/>
               <Image src={Trashcan as string} alt="Trashcan" width={14} onClick={()=> void (async () => await handleDeletion(item.id))()}/>
               </div>
         </div>
