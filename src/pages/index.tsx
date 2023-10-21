@@ -68,7 +68,7 @@ export default function Home() {
             <p className="text-2xl text-white">
             O que fazer com o meu amorzinho??
             <br />
-            quantidade de itens:{tasks.data ? tasks.data.length : "Loading."}
+            Quantidade de itens: {tasks.data ? tasks.data.length : "Loading."}
           </p>
           <p className='text-xl text-white gap-2 p-1'>
             </p>
@@ -88,7 +88,7 @@ export default function Home() {
               {item.task}
 
               <div className='flex gap-3 px-4'>
-              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={void (() => handleCompletion(item.id, item.complete))}/>
+              <input type="checkbox" checked={item.complete} key={item.id} className='bg-blue-500 px-2 py-2 rounded ml-2 ' onClick={void (async () => handleCompletion(item.id, item.complete))}/>
               <Image src={Trashcan as string} alt="Trashcan" width={14} onClick={()=> void (async () => await handleDeletion(item.id))()}/>
               </div>
         </div>
@@ -96,7 +96,7 @@ export default function Home() {
       ))}
       </Suspense>
         </div>
-{/*             <AuthShowcase /> */}
+             <AuthShowcase /> 
           </div>
       </main>
     </>
