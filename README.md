@@ -1,5 +1,7 @@
 ### What to do
 
+[Deploy](https://what-to-do-delta.vercel.app/)
+
 This is a ToDo task application i created for my significant other.
 
 This is a simple Next.js project with a NextAuth.js authentication system, Prisma, Tailwind CSS and tRPC.
