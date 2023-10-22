@@ -1,11 +1,10 @@
-'use client'
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { api } from "@/utils/api";
 import Trashcan from "@/assets/trash-can-solid.svg"
 import { Suspense, useState } from 'react';
-
+import HeaderComponent from "@/components/HeaderComponent";
 
 export default function Home() {
   const user = useSession()
@@ -62,7 +61,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+        <div className="flex flex-col items-center justify-center gap-10 px-4 py-32 text-center">
          
             <p className="text-2xl text-white">
             O que fazer com o meu amorzinho??
@@ -96,31 +95,11 @@ export default function Home() {
       ))}
       </Suspense>
         </div>
-             <AuthShowcase /> 
+             <HeaderComponent/> 
           </div>
       </main>
     </>
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function AuthShowcase() {
-  const { data: sessionData } = useSession();
-
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-[#2e026d] to-[#15162c] rounded-full">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-}
 
